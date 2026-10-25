@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { apiRequest } from './api';
 
 const TOKEN_KEY = 'chatToken';
@@ -32,6 +32,8 @@ export function AuthProvider({ children }) {
 
   const signIn = async (credentials) => saveSession(await apiRequest('/auth/signin', { method: 'POST', body: credentials }));
 
+  const startGuest = async (details) => saveSession(await apiRequest('/auth/guest', { method: 'POST', body: details }));
+
   const updateProfile = async (changes) => {
     const data = await apiRequest('/auth/me', { method: 'PATCH', body: changes, token });
     setUser(data.user);
@@ -44,14 +46,26 @@ export function AuthProvider({ children }) {
     setToken(data.token);
   };
 
-  const signOut = () => {
+  // Stable identity so pages can safely list it in effect dependencies.
+  const signOut = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
+  }, []);
+
+  // Closes the guest account on the server (releasing the name) and signs out here.
+  // Signs out locally even if the request fails; the guest token expires on its own.
+  const endGuestSession = async () => {
+    try {
+      await apiRequest('/auth/guest/end', { method: 'POST', token });
+    } catch {
+      // Nothing more to do; the local session is cleared below either way.
+    }
+    signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, register, signIn, signOut, updateProfile, changePassword }}>
+    <AuthContext.Provider value={{ user, token, loading, register, signIn, startGuest, signOut, endGuestSession, updateProfile, changePassword }}>
       {children}
     </AuthContext.Provider>
   );

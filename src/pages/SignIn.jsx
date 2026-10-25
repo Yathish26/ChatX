@@ -6,7 +6,7 @@ import { useAuth } from '../AuthContext';
 export default function SignIn() {
   const { signIn } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ identifier: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -30,12 +30,27 @@ export default function SignIn() {
     <AuthLayout
       title="Welcome back"
       subtitle="Sign in to continue to Chat."
-      footer={<>New here? <Link to="/register" className="text-purple-400 hover:underline">Create an account</Link></>}
+      footer={
+        <>
+          New here? <Link to="/register" className="text-purple-400 hover:underline">Start chatting</Link> as a guest or with an account
+        </>
+      }
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <FormError message={error} />
-        <TextField label="Email" type="email" value={form.email} onChange={update('email')} placeholder="you@example.com" autoComplete="email" required />
-        <TextField label="Password" type="password" value={form.password} onChange={update('password')} placeholder="Your password" autoComplete="current-password" required />
+        <TextField
+          label="Username or email"
+          type="text"
+          value={form.identifier}
+          onChange={update('identifier')}
+          placeholder="Enter your username or email"
+          autoComplete="username"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          required
+        />
+        <TextField label="Password" type="password" value={form.password} onChange={update('password')} placeholder="Enter your password" autoComplete="current-password" required />
         <SubmitButton loading={loading}>Sign in</SubmitButton>
       </form>
     </AuthLayout>

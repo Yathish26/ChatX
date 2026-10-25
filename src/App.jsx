@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import SignIn from './pages/SignIn';
 import Profile from './pages/Profile';
+import Chat from './pages/Chat';
 import NotFound from './pages/NotFound';
 import { useAuth } from './AuthContext';
 
@@ -13,10 +14,13 @@ function GuestOnly({ children }) {
   return user ? <Navigate to="/" replace /> : children;
 }
 
-function RequireAuth({ children }) {
+// `registeredOnly` keeps guests out of pages they have no use for (they have no profile).
+function RequireAuth({ children, registeredOnly = false }) {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user ? children : <Navigate to="/signin" replace />;
+  if (!user) return <Navigate to="/signin" replace />;
+  if (registeredOnly && user.isGuest) return <Navigate to="/chat" replace />;
+  return children;
 }
 
 export default function App() {
@@ -25,7 +29,9 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/register" element={<GuestOnly><Register /></GuestOnly>} />
       <Route path="/signin" element={<GuestOnly><SignIn /></GuestOnly>} />
-      <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+      <Route path="/profile" element={<RequireAuth registeredOnly><Profile /></RequireAuth>} />
+      <Route path="/chat" element={<RequireAuth><Chat /></RequireAuth>} />
+      <Route path="/chat/:groupId" element={<RequireAuth><Chat /></RequireAuth>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
