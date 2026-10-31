@@ -5,6 +5,8 @@ import SignIn from './pages/SignIn';
 import Profile from './pages/Profile';
 import Chat from './pages/Chat';
 import NotFound from './pages/NotFound';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import { useAuth } from './AuthContext';
 
 // Signed-in users have no reason to see the register/sign-in forms.
@@ -32,6 +34,9 @@ export default function App() {
       <Route path="/profile" element={<RequireAuth registeredOnly><Profile /></RequireAuth>} />
       <Route path="/chat" element={<RequireAuth><Chat /></RequireAuth>} />
       <Route path="/chat/:groupId" element={<RequireAuth><Chat /></RequireAuth>} />
+      {/* Admin has its own sign-in and token, separate from chat accounts. */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin" element={<AdminDashboard />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

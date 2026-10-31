@@ -93,6 +93,18 @@ export default function Chat() {
     socket.on('group:created', upsertGroup);
     socket.on('group:updated', upsertGroup);
 
+    // Admin removals.
+    socket.on('group:deleted', ({ id }) => {
+      setGroups((current) => current.filter((g) => g.id !== id));
+      if (groupIdRef.current === id) navigate('/chat', { replace: true });
+    });
+    socket.on('message:deleted', ({ id }) => {
+      setMessages((current) => current.filter((m) => m.id !== id));
+    });
+    socket.on('messages:removed', ({ senderId }) => {
+      setMessages((current) => current.filter((m) => m.sender.id !== senderId));
+    });
+
     socket.on('typing', ({ groupId: typingGroupId, user: typingUser }) => {
       if (typingGroupId !== groupIdRef.current) return;
       setTypingUsers((current) => ({ ...current, [typingUser.id]: { displayName: typingUser.displayName, at: Date.now() } }));
